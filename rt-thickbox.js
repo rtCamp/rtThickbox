@@ -28,21 +28,21 @@ $.fn.rtThickbox = function (opt){
         $(this).on('click', function(e){            
             e.preventDefault();
            /* overlay HTML */    
-            url = jQuery(this).attr('href');        
-            var str = url.toString();                
-            var youtubeid = '';
-            var youtubeurl = '';                            
-            if(str.match('/www.youtube.com\/watch/gi') !== null){
-                youtubeid = str.split('/www.youtube.com\/watch\?v\=/i');            
-                youtubeurl = 'http://www.youtube.com/embed/' + youtubeid[1];                
-            } else if(str.match('/http:\/\/www.youtube.com\/embed/gi') !== null ){                    
-                youtubeurl = str;                                        
+            url = $(this).attr('href');
+            var youtubeurl = '';                                      
+            if(url.match(/www.youtube.com\/watch/gi) !== null){
+                var youtubeid = url.split('/www.youtube.com\/watch\?v\=/i');            
+                youtubeurl = 'http://www.youtube.com/embed/' + youtubeid[1];
+                $(this).attr('data-rel','video');
+            } else if(url.match(/http:\/\/www.youtube.com\/embed/gi) !== null ){                    
+                youtubeurl = url;
+                $(this).attr('data-rel','video');
             } else {
                 youtubeurl = '';
             }
 
             if(youtubeurl === ''){
-                html = '<img src="'+url+'" alt="" />';
+                html = '<img src="'+url+'" width="'+options.w+'" height="'+options.h+'" alt="" />';
             } else {
                 html = '<iframe class="rt-thickbox-yt" title="YouTube video player" style="margin:0; padding:0;" width="' + options.w + '" ';
                 html += 'height="' + options.h + '" src="' + youtubeurl + '" frameborder="0" allowfullscreen></iframe>';   
@@ -61,6 +61,7 @@ $.fn.rtThickbox = function (opt){
             rtBody.on('click',function(){
                 $(this).fadeOut('fast');
                 rtOverlay.fadeOut('fast');
+                rtBody.html('');
             }); 
         });        
     });
@@ -78,8 +79,6 @@ $.fn.rtThickbox.resize = function(options){
     options.h = options.height;
     options.hratio = $(window).height()/options.originalh ;
     options.wratio = $(window).width()/options.originalw ;
-    options.originalh = $(window).height();
-    options.originalw = $(window).width();   
     
     if(options.wratio === 1){
         options.wratio = options.hratio;
