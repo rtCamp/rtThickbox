@@ -5,33 +5,35 @@
         var options = $.extend(true, $.fn.rtThickbox.defaults, opt);
 
         rtt_var = {
-            w: parseInt(options.width),
-            h: parseInt(options.height),
-            windoww: Math.abs($(window).width() - options.width),
-            windowh: Math.abs($(window).height() - options.height),
-            top: ((Math.abs($(window).height() - options.height)) / 2),
-            left: ((Math.abs($(window).width() - options.width)) / 2),
-            html: '',
-            url: "",
-            originalh: $(window).height(),
-            originalw: $(window).width(),
-            rtBodyw: parseInt(options.width),
-            rtBodyh: parseInt(options.height),
-            rtOverlay: options.rtOverlay,
-            rtBody: options.rtBody,
-            resize: options.resize,
-            hasthumb: options.hasthumb,
-            isslider: options.isslider,
-            leftArrow: options.leftArrow,
-            rightArrow: options.rightArrow,
-            navigationContainer: options.navigationContainer,
-            sliderContainer: options.sliderContainer,
-            next: options.next,
-            prev: options.prev,
-            start: options.start
+            w : parseInt(options.width),
+            h : parseInt(options.height),
+            windoww : Math.abs($(window).width() - options.width),
+            windowh : Math.abs($(window).height() - options.height),
+            top : ((Math.abs($(window).height() - options.height)) / 2),
+            left : ((Math.abs($(window).width() - options.width)) / 2),
+            html : '',
+            url : "",
+            originalh : $(window).height(),
+            originalw : $(window).width(),
+            rtBodyw : parseInt(options.width),
+            rtBodyh : parseInt(options.height),
+            rtOverlay : options.rtOverlay,
+            rtBody : options.rtBody,
+            resize : options.resize,
+            hasthumb : options.hasthumb,
+            isslider : options.isslider,
+            leftArrow : options.leftArrow,
+            rightArrow : options.rightArrow,
+            navigationContainer : options.navigationContainer,
+            sliderContainer : options.sliderContainer,
+            next : options.next,
+            prev : options.prev,
+            start : options.start,
+            duration : options.duration,
+            easing : options.easing
         };
 
-        /* first time click append the markup at the bottom */
+        /* first time click append the markup at the bottom */        
         $.fn.rtThickbox.init(rtt_var);
 
         var rtOverlay = $('.' + rtt_var.rtOverlay);
@@ -102,15 +104,24 @@
 
         $('.rt-thickbox-slide a').on('click', function(e) {
             e.preventDefault();
-            var url = $(this).attr('href');
+            var url = '';
+            if (rtt_var.hasthumb) {
+                if ($(this).find('img').length) {
+                    url = $(this).find('img').attr('src');
+                } else {
+                    url = $(this).attr('href');
+                }
+            } else {
+                url = $(this).attr('href');
+            }            
             var html = '';
             var rtSlider = $('.' + rtt_var.sliderContainer);
             var rtSliderNavi = $('.' + rtt_var.navigationContainer);
             var rtLeftArrow = $('.' + rtt_var.leftArrow);
-            var rtRightArrow = $('.' + rtt_var.rightArrow);
-            if (!rtt_var.resize) {
+            var rtRightArrow = $('.' + rtt_var.rightArrow);            
+            if (!rtt_var.resize && rtt_var.hasthumb) {
                 rtt_var.w = $(this).children().width();
-                rtt_var.h = $(this).children().height();
+                rtt_var.h = $(this).children().height();                
                 rtt_var.windoww = Math.abs($(window).width() - rtt_var.w);
                 rtt_var.windowh = Math.abs($(window).height() - rtt_var.h);
                 rtt_var.top = parseInt(rtt_var.windowh / 2);
@@ -118,9 +129,6 @@
                 rtt_var.rtBodyw = rtt_var.w;
                 rtt_var.rtBodyh = rtt_var.h;
             }
-//            var slide_count = $(this).attr('class').split(/slide-/gi);
-//            console.log(slide_count[1]);
-//            console.log(rtt_var.total_slide_count);         
             html = '<img src="' + url + '" class="' + $(this).attr('class') + '" alt=""  />';
             rtBody.append(html);
 
@@ -161,14 +169,43 @@
             
             var img = rtBody.find('img');
             var previmg = $('.'+prevslide).find('img');
-            img.fadeOut('fast');
-            rtBody.find('img').attr('src', (previmg.attr('src'))).attr('class', prevslide);
-            img.fadeIn('fast');
+            var duration = parseInt(rtt_var.duration / 2);
+            switch(rtt_var.easing){
+                case 'fade' :                        
+                        img.animate({opacity: 0}, {queue: false, duration: duration, complete : function(){
+                            img.attr('src', (previmg.attr('src'))).attr('class', prevslide);
+                            img.animate({opacity: 1}, {queue: false, duration: duration});
+                        }});
+                        break;
+                        
+                case 'left' :
+                    var prevslide_1 = 0;
+                    if( parseInt(current_slide[1]) === 0 ){
+                        prevslide_1 += rtt_var.total_slide_count - 1;
+                    } else {
+                        prevslide_1 += parseInt(current_slide[1]) - 1;
+                    }
+                    
+                    var img2 = $('.slide-'+prevslide_1).find('img');
+                    img.css('position','absolute').css('top','0').css('left','0').addClass('img1');
+                    rtBody.prepend(img.clone());                    
+                    img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+prevslide_1).css('left', (0 - img.parent().width()));                    
+                    img2.animate({left: 0}, {queue: false, duration: duration});
+                    img.animate({left: (img.parent().width())}, {queue: false, duration: duration, complete : function(){
+                        img.remove();
+                    }});                    
+                    break;
+            }   
             
-            console.log(rtBody);
+            
+//            img.fadeOut(250, function () {
+//                img.attr('src', (previmg.attr('src'))).attr('class', prevslide);
+//                img.fadeIn(250);
+//            });            
         });
     
-        $('.'+rtt_var.rightArrow).on('click', rtt_var, function(){            
+        $('.'+rtt_var.rightArrow).on('click', rtt_var, function(e){
+            e.preventDefault();            
             var rtBody = $('.' + rtt_var.rtBody);
             var current_slide = rtBody.find('img').attr('class').split(/slide\-/gi);
             var nxtslide = 'slide-';
@@ -180,9 +217,41 @@
             
             var img = rtBody.find('img');
             var nxtimg = $('.'+nxtslide).find('img');
-            img.fadeOut('fast');
-            rtBody.find('img').attr('src', (nxtimg.attr('src'))).attr('class', nxtslide);
-            img.fadeIn('fast');
+            var duration = parseInt(rtt_var.duration / 2);
+            
+            switch(rtt_var.easing){
+                case 'fade' :   
+                    img.animate({opacity: 0}, {queue: false, duration: duration, complete : function(){
+                        img.attr('src', (nxtimg.attr('src'))).attr('class', nxtslide);
+                        img.animate({opacity: 1}, {queue: false, duration: 'slow'});
+                    }});
+                    break;
+                    
+                case 'left' :
+                    var prevslide_1 = 0;
+                    if( parseInt(current_slide[1]) === 0 ){
+                        prevslide_1 += rtt_var.total_slide_count + 1;
+                    } else {
+                        prevslide_1 += parseInt(current_slide[1]) + 1;
+                    }
+                    
+                    var img2 = $('.slide-'+prevslide_1).find('img');
+                    img.css('position','absolute').css('top','0').addClass('img1');
+                    rtBody.append(img.clone());                    
+                    img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+prevslide_1).css('left', img.parent().width());
+                    img.animate({left: -(img.parent().width())}, {queue: false, duration: duration});
+                    img2.animate({left: 0}, {queue: false, duration: duration, complete : function(){
+                        img.remove();
+                    }});
+                    break;
+                
+            }
+            
+    
+//            img.fadeOut(250, function () {
+//                img.attr('src', (nxtimg.attr('src'))).attr('class', nxtslide);
+//                img.fadeIn(250);
+//            });            
         });
         
         /* on window resize rearrage the position and resize the height width of the overlay */
@@ -211,8 +280,7 @@
 
                 rtBody.removeAttr('style');
                 if (!rtt_var.resize) {
-                    rtBody.css('position', 'absolute');
-                    console.log($(window).scrollTop());
+                    rtBody.css('position', 'absolute');                    
 
                 }
                 if (rtt_var.isslider) {
@@ -240,7 +308,7 @@
         if (document.getElementById('rt-overlay') === null) {
             $('body').append('<div class="' + rtt_var.rtOverlay + '"></div><div class="' + rtt_var.rtBody + '"></div>');
         }
-        if (rtt_var.isslider) {
+        if (rtt_var.isslider) {            
             $('.' + rtt_var.rtBody).remove();
             $('body').append('<div class="' + rtt_var.sliderContainer + '"><div class="' + rtt_var.rtBody + '"></div><div class="' + rtt_var.navigationContainer + '"><a href="#" class="' + rtt_var.leftArrow + '" title="' + rtt_var.prev + '" >' + rtt_var.prev + '</a><a href="#" class="' + rtt_var.rightArrow + '" title="' + rtt_var.next + '" >' + rtt_var.next + '</a></div>');
             rtt_var.total_slide_count = 0;
@@ -282,7 +350,9 @@
         navigationContainer: 'rtt-navigation',
         next: 'Next',
         prev: 'Prev',
-        start: 0
+        start: 0,
+        duration: 500,
+        easing : 'fade'
     };
 
 //$.fn.rtThickbox.slider = $.extend({},$.fn.rtThickbox,function(opt){
