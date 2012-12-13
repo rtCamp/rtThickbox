@@ -31,7 +31,7 @@
             start : options.start,
             duration : options.duration,
             easing : options.easing,
-            hastitle : { selector : options.hastitle.selector , opsition : options.hastitle.opsition , binding : options.hastitle.binding }
+            hastitle : options.hastitle
         };
 
         /* first time click append the markup at the bottom */        
@@ -46,6 +46,7 @@
             /* overlay HTML */
             var url = '';
             var html = '';
+            var title = '';
             if (rtt_var.hasthumb) {
                 if ($(this).find('img').length) {
                     url = $(this).find('img').attr('src');
@@ -83,6 +84,9 @@
                 html += 'height="' + rtt_var.h + '" src="' + youtubeurl + '" frameborder="0" allowfullscreen></iframe>';
             }
 
+//            if(rtt_var.hastitle){
+//                html += title;
+//            }
             rtBody.append(html);
 
             /* handle the click event */
@@ -145,11 +149,11 @@
                 rtBody.find('img').css('height', rtt_var.h + 'px');
             }
             
-            rtLeftArrow.css('left', (rtt_var.left - (rtLeftArrow.width()/2))).css('top', (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2)));
-            rtRightArrow.css('left', (rtt_var.left + rtt_var.rtBodyw) ).css('top', (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2)));
-            rtSliderNavi.css('width', (parseInt(rtt_var.rtBodyw) + 10) + 'px').css('height', 'auto').css('top', (rtt_var.top + (parseInt(rtt_var.rtBodyh) + 10) )).css('left', rtt_var.left).fadeIn('fast');            
+            rtLeftArrow.css({left : (rtt_var.left - (rtLeftArrow.width()/2)), top : (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2))});
+            rtRightArrow.css({left : (rtt_var.left + rtt_var.rtBodyw), top : (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2))});
+            rtSliderNavi.css({width : (parseInt(rtt_var.rtBodyw) + 10) + 'px', height : 'auto', top : (rtt_var.top + (parseInt(rtt_var.rtBodyh) + 10) ), left : rtt_var.left}).fadeIn('fast');            
             $.fn.rtThickbox.gettitle(rtt_var, $(this));
-            rtBody.css('width', (parseInt(rtt_var.rtBodyw) + 10) + 'px').css('height', (parseInt(rtt_var.rtBodyh) + 10) + 'px').css('top', rtt_var.top).css('left', rtt_var.left).fadeIn('fast');
+            rtBody.css({width : (parseInt(rtt_var.rtBodyw) + 10) + 'px', height : (parseInt(rtt_var.rtBodyh) + 10) + 'px', top : rtt_var.top, left: rtt_var.left}).fadeIn('fast');
             rtSlider.show();
 
             /* clears overlay and content */
@@ -169,6 +173,7 @@
             var rtBody = $('.' + rtt_var.rtBody);
             var current_slide = rtBody.find('img').attr('class').split(/slide\-/gi);
             var prevslide = 'slide-';
+            console.log(current_slide[1]);
             if( parseInt(current_slide[1]) === 0 ){
                 prevslide += rtt_var.total_slide_count - 1;
             } else {
@@ -187,9 +192,11 @@
                                     currentObj.addClass('disable-left');
                                     if (rtt_var.hasthumb) {
                                         img.attr('src', (previmg.attr('src'))).attr('class', prevslide);
-                                    } else {
+                                        $.fn.rtThickbox.gettitle(rtt_var, previmg);
+                                    } else {                                        
                                         img.attr('src', (previmg.parent().attr('href'))).attr('class', prevslide);
-                                    }
+                                        $.fn.rtThickbox.gettitle(rtt_var, previmg.parent());
+                                    }                                    
                                     img.stop(true,true).animate({opacity: 1}, { queue: false, duration: duration, complete : function(){
                                         currentObj.removeClass('disable-left'); 
                                     }});
@@ -207,17 +214,20 @@
                             }
 
                             var img2 = $('.slide-'+prevslide_1).find('img');
-                            img.css('position','absolute').css('top','0').css('left','0').addClass('img1');
+                            img.css({position : 'absolute', top :'0', left : '0'}).addClass('img1');
                             rtBody.prepend(img.clone()); 
+                            
                             if (rtt_var.hasthumb) {
                                 img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+prevslide_1).css('left', (0 - img.parent().width()));
                             } else {                                
-                                img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+prevslide_1).css('left', (0 - img.parent().width()));
-                            }                            
+                                img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+prevslide_1).css('left', (0 - img.parent().width()));                             
+                            }
+                            
+                            $.fn.rtThickbox.gettitle(rtt_var, img2 ,true);
                             currentObj.addClass('disable-left');
-                            img2.stop(true,true).animate({left: 0}, {queue: false, duration: duration});                            
+                            img2.stop(true,true).animate({left: 0}, {queue: false, duration: duration});
                             img.stop(true,true).animate({left: (img.parent().width())}, {queue: false, duration: duration, complete : function(){
-                                img.remove();                            
+                                img.remove();
                                 currentObj.removeClass('disable-left');
                             }});
                         }
@@ -233,13 +243,16 @@
                             }
 
                             var img2 = $('.slide-'+prevslide_1).find('img');
-                            img.css('position','absolute').css('top','0').css('left','0').addClass('img1');
+                            img.css({position : 'absolute', top : '0', left : '0'}).addClass('img1');
                             rtBody.prepend(img.clone());
+                            
                             if (rtt_var.hasthumb) {
                                 img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+prevslide_1).css('top', (0 - img.parent().height()));
                             } else {
                                 img2 = rtBody.find('img.img1').eq(0).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+prevslide_1).css('top', (0 - img.parent().height()));
-                            }                            
+                            }
+                        
+                            $.fn.rtThickbox.gettitle(rtt_var, img2, true);
                             currentObj.addClass('disable-left');
                             img2.stop(true,true).animate({top: 0}, {queue: false, duration: duration});
                             img.stop(true,true).animate({top: (img.parent().height())}, {queue: false, duration: duration, complete : function(){
@@ -275,10 +288,12 @@
                                 currentObj.addClass('disable-right');
                                 if (rtt_var.hasthumb) {
                                     img.attr('src', (nxtimg.attr('src'))).attr('class', nxtslide);
+                                    $.fn.rtThickbox.gettitle(rtt_var, nxtimg);
                                 } else {
                                     img.attr('src', (nxtimg.parent().attr('href'))).attr('class', nxtslide);
-                                }                                
-                                img.stop(true,true).animate({opacity: 1}, {queue: false, duration: 'slow', complete : function(){
+                                    $.fn.rtThickbox.gettitle(rtt_var, nxtimg);
+                                }
+                                img.stop(true,true).animate({opacity: 1}, {queue: false, duration: 'slow', complete : function(){                                    
                                     currentObj.removeClass('disable-right');
                                 }});
                             }});
@@ -295,13 +310,16 @@
                             }
 
                             var img2 = $('.slide-'+nxtslide_1).find('img');
-                            img.css('position','absolute').css('top','0').addClass('img1');
+                            img.css({position : 'absolute', top : '0'}).addClass('img1');
                             rtBody.append(img.clone());
+                            
                             if (rtt_var.hasthumb) {
-                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+nxtslide_1).css('left', img.parent().width());
+                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+nxtslide_1).css('left', img.parent().width());                                
                             } else {
-                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+nxtslide_1).css('left', img.parent().width());
-                            }                            
+                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+nxtslide_1).css('left', img.parent().width());                             
+                            }
+                            
+                            $.fn.rtThickbox.gettitle(rtt_var, img2, true);
                             currentObj.addClass('disable-right');
                             img.stop(true,true).animate({left: -(img.parent().width())}, {queue: false, duration: duration});
                             img2.stop(true,true).animate({left: 0}, {queue: false, duration: duration, complete : function(){
@@ -321,13 +339,16 @@
                             }
 
                             var img2 = $('.slide-'+nxtslide_1).find('img');
-                            img.css('position','absolute').css('top','0').addClass('img1');
+                            img.css({position : 'absolute', top : '0'}).addClass('img1');
                             rtBody.append(img.clone());
+                            
                             if (rtt_var.hasthumb) {
-                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+nxtslide_1).css('top', img.parent().height());
+                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.attr('src')).addClass('img2').addClass('slide-'+nxtslide_1).css('top', img.parent().height());                                
                             } else {
-                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+nxtslide_1).css('top', img.parent().height());
-                            }                            
+                                img2 = rtBody.find('img.img1').eq(1).removeAttr('class').attr('src',img2.parent().attr('href')).addClass('img2').addClass('slide-'+nxtslide_1).css('top', img.parent().height());                                
+                            }
+                            
+                            $.fn.rtThickbox.gettitle(rtt_var, img2, true);
                             currentObj.addClass('disable-right');
                             img.stop(true,true).animate({top: -(img.parent().height())}, {queue: false, duration: duration});
                             img2.stop(true,true).animate({top: 0}, {queue: false, duration: duration, complete : function(){
@@ -342,7 +363,7 @@
         
         /* on window resize rearrage the position and resize the height width of the overlay */
         $(window).on('resize', rtt_var, function() {
-            if (rtBody.html().length) {
+            if (rtBody.find('img').length || rtBody.find('iframe').length) {
                 if (!rtt_var.resize) {
                     rtt_var.w = rtBody.find('img').width();
                     rtt_var.h = rtBody.find('img').height();
@@ -373,14 +394,17 @@
                     var rtSliderNavi = $('.' + rtt_var.navigationContainer);
                     var rtLeftArrow = $('.' + rtt_var.leftArrow);
                     var rtRightArrow = $('.' + rtt_var.rightArrow);
-                    rtSliderNavi.css('width', (parseInt(rtt_var.rtBodyw) + 10) + 'px').css('height', 'auto').css('top', (rtt_var.top + (parseInt(rtt_var.rtBodyh) + 10) )).css('left', rtt_var.left).fadeIn('fast');
-                    rtLeftArrow.css('left', (rtt_var.left - (rtLeftArrow.width()/2))).css('top', (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2)));
-                    rtRightArrow.css('left', (rtt_var.left + rtt_var.rtBodyw) ).css('top', (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2)));
+                    rtSliderNavi.css({ width : (parseInt(rtt_var.rtBodyw) + 10) + 'px', height : 'auto', top : (rtt_var.top + (parseInt(rtt_var.rtBodyh) + 10) ), left : rtt_var.left}).fadeIn('fast');
+                    rtLeftArrow.css({left : (rtt_var.left - (rtLeftArrow.width()/2)), top : (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2))});
+                    rtRightArrow.css({ left : (rtt_var.left + rtt_var.rtBodyw) , top : (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2))});
                 }
-                rtBody.css('width', (parseInt(rtt_var.rtBodyw) + 10) + 'px').css('height', (parseInt(rtt_var.rtBodyh) + 10) + 'px');
-                rtBody.find('img').css('width', rtt_var.w).css('height', rtt_var.h);
-                rtBody.find('iframe.rt-thickbox-yt').css('width', rtt_var.w).css('height', rtt_var.h);
-                rtBody.css('top', rtt_var.top + 'px').css('left', rtt_var.left + 'px');
+                rtBody.css({ width : (parseInt(rtt_var.rtBodyw) + 10) + 'px', height : (parseInt(rtt_var.rtBodyh) + 10) + 'px'});
+                rtBody.find('img').css({width : rtt_var.w, height : rtt_var.h});
+                rtBody.find('iframe.rt-thickbox-yt').css({ width : rtt_var.w, height : rtt_var.h});
+                rtBody.css({top : rtt_var.top + 'px', left : rtt_var.left + 'px'});
+                if(rtt_var.hastitle && rtt_var.hastitle.selector !== ''){
+                    rtBody.find('div.title').css('width', (rtt_var.rtBodyw - 10));
+                }
                 rtBody.show();
 
                 rtt_var.originalh = $(window).height();
@@ -390,19 +414,43 @@
     };
 
     /* Function to get title */
-    $.fn.rtThickbox.gettitle = function(rtt_var, curr_obj){        
+    $.fn.rtThickbox.gettitle = function(rtt_var, curr_obj, isnav){        
+        console.log(curr_obj);
         var rtBody = $('.' + rtt_var.rtBody);
         var title = '';
         if(rtt_var.hastitle && rtt_var.hastitle.selector !== ''){
             if (rtt_var.hasthumb) {
-                title = '<div class="title">'+curr_obj.find('img').attr(rtt_var.hastitle.selector)+'</div>';
+                if(isnav === true){
+                    title = curr_obj.attr(rtt_var.hastitle.selector);
+                    var tmp = curr_obj.attr('class').split(/\s/gi);                    
+                    title = $('.rt-thickbox-slide a.'+tmp[1]).find('img').attr(rtt_var.hastitle.selector);
+                } else {
+                    title = curr_obj.find('img').attr(rtt_var.hastitle.selector);
+                }                
             } else {
-                title = '<div class="title">'+curr_obj.attr(rtt_var.hastitle.selector)+'</div>';
-            }
-        
-            if(rtBody.find('title').length){
-                var title_obj = rtBody.find('title');
-                title_obj.css('position', 'absolute').css('width','100%');
+                if(isnav === true){                    
+                    var tmp = curr_obj.attr('class').split(/\s/gi);                    
+                    title = $('.rt-thickbox-slide a.'+tmp[1]).attr(rtt_var.hastitle.selector);
+                } else {
+                    title = curr_obj.attr(rtt_var.hastitle.selector);
+                }                
+            }            
+            rtBody.find('div.title').text(title);            
+            
+            if(rtBody.find('div.title').length){
+                
+                var title_obj = rtBody.find('div.title');
+                title_obj.css({
+                    position : 'absolute',
+                    width : (rtt_var.rtBodyw - 10),
+                    left : 0,
+                    padding : '5px',
+                    margin : '5px',
+                    background : rtt_var.hastitle.bgcolor,
+                    opacity : rtt_var.hastitle.opacity,
+                    color : rtt_var.hastitle.color
+                }).css('z-index', 102);
+            
                 switch(rtt_var.hastitle.opsition){
                     case 'bottom' : 
                          title_obj.css('bottom', '0');
@@ -411,33 +459,33 @@
                     case 'top' : 
                         title_obj.css('top', '0');
                         break;
-                }
-                switch(rtt_var.hastitle.binding){
-                    case 'inner' : 
-                         title_obj.css('bottom', '0');
-                        break;
-
-                    case 'outer' : 
-                        title_obj.css('top', '0');
-                        break;
-                }
-            }
-            rtBody.append(title);
+                }                
+            }            
         }        
     }
 
     /* Function to append the ovelay markup at the botttom of the body */
     $.fn.rtThickbox.init = function(rtt_var) {        
         if ( $('.'+rtt_var.rtOverlay).length === 0 ) {
-            $('body').append('<div class="' + rtt_var.rtOverlay + '"></div><div class="' + rtt_var.rtBody + '"></div>');
+            var html = '<div class="' + rtt_var.rtOverlay + '"></div><div class="' + rtt_var.rtBody + '">';
+            if(rtt_var.hastitle && rtt_var.hastitle.selector !== ''){
+                html += '<div class="title"></div>';
+            }
+            html += '</div>';
+            $('body').append(html);
         }
         if (rtt_var.isslider) {
             $('.' + rtt_var.rtBody).remove();
-            $('body').append('<div class="' + rtt_var.sliderContainer + '"><div class="' + rtt_var.rtBody + '"></div><div class="' + rtt_var.navigationContainer + '"><a href="#" class="' + rtt_var.leftArrow + '" title="' + rtt_var.prev + '" >' + rtt_var.prev + '</a><a href="#" class="' + rtt_var.rightArrow + '" title="' + rtt_var.next + '" >' + rtt_var.next + '</a></div>');
+            var html = '<div class="' + rtt_var.sliderContainer + '"><div class="' + rtt_var.rtBody + '">';
+            if(rtt_var.hastitle && rtt_var.hastitle.selector !== ''){
+                html += '<div class="title"></div>';
+            }
+            html += '</div><div class="' + rtt_var.navigationContainer + '"><a href="#" class="' + rtt_var.leftArrow + '" title="' + rtt_var.prev + '" >' + rtt_var.prev + '</a><a href="#" class="' + rtt_var.rightArrow + '" title="' + rtt_var.next + '" >' + rtt_var.next + '</a></div>';
+            $('body').append(html);
             rtt_var.total_slide_count = 0;
             $('.rt-thickbox dl').each(function(i) {
                 jQuery(this).addClass('rt-thickbox-slide');
-                jQuery(this).find('a').addClass('slide-' + i);                
+                jQuery(this).find('a').addClass('slide-' + i);
                 rtt_var.total_slide_count++;
             });
         }
@@ -457,7 +505,8 @@
         rtBody.css('display', 'none');
         $('.'+rtt_var.leftArrow).removeClass('disable-left')
         $('.'+rtt_var.rightArrow).removeClass('disable-left')
-        rtBody.html('');
+        rtBody.find('img').remove();
+        rtBody.find('iframe').remove();
     };
 
     /* Default rtt_var */
@@ -478,11 +527,7 @@
         start: 0,
         duration: 500,
         easing : 'fade',
-        hastitle : { selector : '', opsition : '', binding : '' }
+        hastitle : { selector : '', opsition : '' }
     };
-
-//$.fn.rtThickbox.slider = $.extend({},$.fn.rtThickbox,function(opt){
-//        console.log(opt);
-//});
 
 })(jQuery);
