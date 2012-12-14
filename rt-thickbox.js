@@ -84,20 +84,16 @@
                 html += 'height="' + rtt_var.h + '" src="' + youtubeurl + '" frameborder="0" allowfullscreen></iframe>';
             }
 
-//            if(rtt_var.hastitle){
-//                html += title;
-//            }
             rtBody.append(html);
 
             /* handle the click event */
             rtOverlay.fadeIn('fast');
             if (rtBody.find('img').length) {
-                rtBody.find('img').css('width', rtt_var.w + 'px');
-                rtBody.find('img').css('height', rtt_var.h + 'px');
+                rtBody.find('img').css({width : rtt_var.w + 'px', height : rtt_var.h + 'px'});
             }
 
             $.fn.rtThickbox.gettitle(rtt_var, $(this));
-            rtBody.css('width', (parseInt(rtt_var.rtBodyw) + 10) + 'px').css('height', (parseInt(rtt_var.rtBodyh) + 10) + 'px').css('top', rtt_var.top).css('left', rtt_var.left).fadeIn('fast');
+            rtBody.css({width : (parseInt(rtt_var.rtBodyw) + 10) + 'px', height : (parseInt(rtt_var.rtBodyh) + 10) + 'px', top : rtt_var.top, left : rtt_var.left}).fadeIn('fast');
 
             /* clears overlay and content */
             rtOverlay.on('click', function() {
@@ -145,8 +141,7 @@
             /* handle the click event */
             rtOverlay.fadeIn('fast');
             if (rtBody.find('img').length) {
-                rtBody.find('img').css('width', rtt_var.w + 'px');
-                rtBody.find('img').css('height', rtt_var.h + 'px');
+                rtBody.find('img').css({width : rtt_var.w + 'px', height : rtt_var.h + 'px'});
             }
             
             rtLeftArrow.css({left : (rtt_var.left - (rtLeftArrow.width()/2)), top : (rtt_var.top + ((parseInt(rtt_var.rtBodyh) + 10) / 2))});
